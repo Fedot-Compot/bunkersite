@@ -1,0 +1,3 @@
+{% for other in users %}
+    <div class="{% if other.id == user.id %} font-bold {% endif %}">{{ other.username }}</div>
+{% endfor %}

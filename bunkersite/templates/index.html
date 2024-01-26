@@ -2,8 +2,8 @@
 
 {% block app %}
   <form hx-post="/user/login">
-    <input name="username" placeholder="Insert username" />
-    <button type="submit">Create Room</button>
+    <input class="focus:border-black hover:border-black border-gray-400 border-2 focus:outline-none focus:ring-0 rounded p-[2px]" name="username" placeholder="Insert username" />
+    <button class="border-black rounded bg-lime-600 hover:bg-lime-500 p-1" type="submit">Create Room</button>
   </form>
 
   {% include 'games_list.html' %}

@@ -85,3 +85,5 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 migrations/
+
+node_modules
