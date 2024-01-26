@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from bunkergames.models import Game
 from django.contrib.sessions.models import Session
@@ -8,6 +9,7 @@ class User(models.Model):
     username = models.CharField(max_length=32)
     session_key = models.ForeignKey(Session, on_delete=models.CASCADE)
     host = models.BooleanField(default=False)
+    ready = models.BooleanField(default=False)
     data =  models.JSONField(blank=True, null=True)
     
     class Meta:
