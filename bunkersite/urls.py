@@ -22,6 +22,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index),
+    path("game", views.game),
     path("user/", include("bunkerusers.urls")),
     path("game/", include("bunkergames.urls")),
     path("admin/", admin.site.urls),

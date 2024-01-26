@@ -1,0 +1,4 @@
+<div>Your games</div>
+{% for game in games %}
+  <button hx-get="/game?game_id={{ game.id }}" hx-target="#app" hx-replace-url="true">{{ game.id }}</button>
+{% endfor %}
