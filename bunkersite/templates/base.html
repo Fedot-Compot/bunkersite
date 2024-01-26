@@ -1,0 +1,24 @@
+{% load static %}
+<html>
+  <head>
+    <script src="{% static "js/htmx.min.js" %}"></script>
+    <link rel="stylesheet" type='text/css' href="{% static "css/style.css" %}">
+  </head>
+  <body>
+    <div id="navbar">
+      {% block nav %}
+
+      {% endblock %}
+    </div>
+    <div id="app">
+      {% block app %}
+
+      {% endblock %}
+    </div>
+    <div id="footer">
+      {% block footer %}
+
+      {% endblock %}
+    </div>
+  </body>
+</html>

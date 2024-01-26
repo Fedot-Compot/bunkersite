@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block app %}
+  <form hx-post="/user/login">
+    <input name="username" placeholder="Insert username" />
+    <button type="submit">Create Room</button>
+  </form>
+{% endblock %}

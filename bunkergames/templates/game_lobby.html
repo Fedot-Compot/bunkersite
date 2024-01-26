@@ -1,0 +1,4 @@
+<div>Lobby {{ gameData.id }}</div>
+{% for other in users %}
+    <div class="{% if other.id == user.id %}marked{% endif %}">{{ other.username }}</div>
+{% endfor %}
