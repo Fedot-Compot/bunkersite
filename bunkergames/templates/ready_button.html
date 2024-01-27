@@ -1,0 +1,5 @@
+{% if user.ready %}
+  <button class="rounded bg-red-600 hover:bg-red-500 px-2 py-1" hx-post="/game/not-ready?game_id={{ gameData.id }}" hx-target="#app">Not ready</button>
+{% else %}
+  <button class="rounded bg-lime-600 hover:bg-lime-500 px-2 py-1" hx-post="/game/ready?game_id={{ gameData.id }}" hx-target="#app">Ready</button>
+{% endif %}

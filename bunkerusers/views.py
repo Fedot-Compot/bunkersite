@@ -50,9 +50,7 @@ def login(request):
     try:
         User.objects.create(game_id=game, username=username, host=host, session_key = session)
     except IntegrityError:
-        res = HttpResponseBadRequest()
-        res["HX-Trigger"] = 'duplicate-user'
-        return res
+        return HttpResponseBadRequest()
     
     # user: ok
     

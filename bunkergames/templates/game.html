@@ -1,17 +1,5 @@
 {% extends 'base.html' %}
 
 {% block app %}
-  {% if user %}
-    {% if gameData.started %}
-      {% include 'game_state.html' %}
-    {% else %}
-      {% include 'game_lobby.html' %}
-    {% endif %}
-  {% else %}
-    {% if gameData.started %}
-      {% include 'spectate_game.html' %}
-    {% else %}
-      {% include 'enter_lobby.html' %}
-    {% endif %}
-  {% endif %}
+{% include "game_view.html" %}
 {% endblock %}

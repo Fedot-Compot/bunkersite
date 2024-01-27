@@ -1,0 +1,15 @@
+<div>
+  {% if gameData.started %}
+    Playing
+  {% else %}
+    Lobby
+  {% endif %} {{ gameData.id }}
+</div>
+
+{% include 'user_list.html' %}
+
+{% if not user and not gameData.started %}
+  {% include 'enter_lobby.html' %}
+{% elif user and not gameData.started %}
+  {% include 'ready_button.html' %}
+{% endif %}
