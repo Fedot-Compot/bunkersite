@@ -1,4 +1,8 @@
-<div hx-get="/game/state?game_id={{ gameData.id }}" hx-replace="outerHTML" hx-trigger="gameStateChange from:body">
+<div
+	hx-get="/game/state?bodygame_id={{ gameData.id }}"
+	hx-replace="outerHTML"
+	hx-trigger="gameStateChange from:body"
+	>
 	{% include 'game_header.html'%}
 
 	{% include 'user_list.html' %}
