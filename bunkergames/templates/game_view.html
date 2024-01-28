@@ -1,15 +1,15 @@
-<div>
-  {% if gameData.started %}
-    Playing
-  {% else %}
-    Lobby
-  {% endif %} {{ gameData.id }}
+<div hx-get="/game/state?game_id={{ gameData.id }}" hx-replace="outerHTML" hx-trigger="gameStateChange from:body">
+	{% include 'game_header.html'%}
+
+	{% include 'user_list.html' %}
+
+	{% if not user and not gameData.started %}
+	{% include 'enter_lobby.html' %}
+	{% elif user and not gameData.started %}
+	{% include 'ready_button.html' %}
+	{% endif %}
+
+	{% if user.host and not game.started %}
+	{% include 'start_button.html' %}
+	{% endif %}
 </div>
-
-{% include 'user_list.html' %}
-
-{% if not user and not gameData.started %}
-  {% include 'enter_lobby.html' %}
-{% elif user and not gameData.started %}
-  {% include 'ready_button.html' %}
-{% endif %}

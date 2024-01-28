@@ -1,19 +1,24 @@
-<div id="user-list-container" hx-get="/game/user_list?game_id={{ gameData.id }}" hx-trigger="game-user-state-change" class="flex flex-col my-5">
-{% for other in users %}
-    <div class="
-        inline-block
-        m-1
-        outline
-        outline-1
-        rounded
-        {% if other.ready%}
-            outline-green-600
-        {% else %}
-            outline-red-600
-        {% endif %}
-        {% if other.id == user.id %}
-            font-bold
-        {% endif %}
-        ">{{ other.username }}</div>
-{% endfor %}
+<div id="user-list-container"
+	hx-get="/game/user_list?game_id={{ gameData.id }}"
+	hx-trigger="UserGameStateChange from:body"
+	hx-swap="outerHTML"
+	class="flex flex-col my-5"
+	>
+	{% for other in users %}
+	<div class="
+		flex
+		flex-row
+		m-1
+		outline
+		outline-1
+		rounded
+		{% if other.ready%} outline-green-600
+		{% else %}outline-red-600 {% endif %}
+		{% if other.id == user.id %} font-bold {% endif %}
+		"><span>{{ other.username }}</span>
+		{% if other.host %}
+		<img src="static/img/host_mark.png" class="w-4 h-4 m-1"/>
+		{% endif%}
+	</div>
+	{% endfor %}
 </div>
