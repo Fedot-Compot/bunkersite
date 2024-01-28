@@ -7,13 +7,5 @@
 
 	{% include 'user_list.html' %}
 
-	{% if not user and not gameData.started %}
-	{% include 'enter_lobby.html' %}
-	{% elif user and not gameData.started %}
-	{% include 'ready_button.html' %}
-	{% endif %}
-
-	{% if user.host and not game.started %}
-	{% include 'start_button.html' %}
-	{% endif %}
+	{% include 'game_actions.html' %}
 </div>

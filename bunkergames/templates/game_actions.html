@@ -1,0 +1,15 @@
+{% if not user and not gameData.started %}
+
+	{% include 'enter_lobby.html' %}
+
+{% elif user %}
+
+	{% if not gameData.started %}
+		{% include 'ready_button.html' %}
+		{% if user.host %}
+			{% include 'start_button.html' %}
+		{% endif %}
+	{% endif %}
+
+{% endif %}
+

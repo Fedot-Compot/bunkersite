@@ -66,10 +66,13 @@ def start_game(request):
     if request.method != 'POST':
         return HttpResponseBadRequest()
     session = Session.objects.get(session_key=request.session.session_key)
+
     try:
         game = Game.objects.get(id=request.GET.get('game_id', ''))
     except Game.DoesNotExist:
         return Http404()
+
+    users = User.objects.filter(game_id=game)
 
     try:
         user = User.objects.get(game_id=game, session_key=session)
@@ -77,6 +80,10 @@ def start_game(request):
         raise PermissionDenied("User not registered")
 
     if user.host:
+        for game_user in users:
+            if not game_user.ready:
+                raise PermissionDenied("Users are not ready")
+
         game.started = True
         game.save()
     else:
