@@ -1,1 +1,7 @@
-<button class="rounded bg-orange-500 hover:bh-orange-400 px-2 py-1" id="start-button" hx-get="/game/start?game_id={{ gameData.id }}" hx-target="#app">Start</button>
+<button
+	id="start-button"
+	class="rounded bg-orange-500 hover:bh-orange-400 px-2 py-1"
+	hx-post="/game/start?game_id={{ gameData.id }}"
+	hx-swap="none">
+	Start
+</button>
