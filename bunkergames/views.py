@@ -30,10 +30,12 @@ def ready(request):
 
     users = User.objects.filter(game_id=game)
 
+    game.can_start = all(game_user.ready for game_user in users)
+
     context = {'gameData': game, 'users': users, 'user': user}
 
     response = render(request, 'ready_button.html', context)
-    response["HX-Trigger"] = "UserGameStateChange"
+    response["HX-Trigger"] = "UserGameStateChange, ActionsGameStateChange"
     return response
 
 
@@ -54,10 +56,12 @@ def not_ready(request):
 
     users = User.objects.filter(game_id=game)
 
+    game.can_start = all(game_user.ready for game_user in users)
+
     context = {'gameData': game, 'users': users, 'user': user}
 
     response = render(request, 'ready_button.html', context)
-    response["HX-Trigger"] = "UserGameStateChange"
+    response["HX-Trigger"] = "UserGameStateChange, ActionsGameStateChange"
     return response
 
 
@@ -110,9 +114,35 @@ def game_state(request):
 
     users = User.objects.filter(game_id=game)
 
+    game.can_start = all(game_user.ready for game_user in users)
+
     context = {'gameData': game, 'users': users, 'user': user}
 
     response = render(request, 'game_view.html', context)
+    return response
+
+
+def game_actions(request):
+    session = Session.objects.get(session_key=request.session.session_key)
+    try:
+        game = Game.objects.get(id=request.GET.get('game_id', ''))
+    except Game.DoesNotExist:
+        return Http404()
+
+    user = None
+
+    try:
+        user = User.objects.get(game_id=game, session_key=session)
+    except User.DoesNotExist:
+        pass
+
+    users = User.objects.filter(game_id=game)
+
+    game.can_start = all(game_user.ready for game_user in users)
+
+    context = {'gameData': game, 'users': users, 'user': user}
+
+    response = render(request, 'game_actions.html', context)
     return response
 
 
@@ -131,6 +161,8 @@ def user_list(request):
         pass
 
     users = User.objects.filter(game_id=game)
+
+    game.can_start = all(game_user.ready for game_user in users)
 
     context = {'gameData': game, 'users': users, 'user': user}
 

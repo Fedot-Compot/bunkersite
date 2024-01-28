@@ -1,15 +1,20 @@
-{% if not user and not gameData.started %}
+<div
+	id="game-actions"
+	hx-trigger="ActionsGameStateChange from:body"
+	hx-swap="outerHTML"
+	hx-get="/game/actions?game_id={{ gameData.id }}">
+	{% if not user and not gameData.started %}
 
 	{% include 'enter_lobby.html' %}
 
-{% elif user %}
+	{% elif user %}
 
 	{% if not gameData.started %}
-		{% include 'ready_button.html' %}
-		{% if user.host %}
-			{% include 'start_button.html' %}
-		{% endif %}
+	{% include 'ready_button.html' %}
+	{% if user.host %}
+	{% include 'start_button.html' %}
+	{% endif %}
 	{% endif %}
 
-{% endif %}
-
+	{% endif %}
+</div>

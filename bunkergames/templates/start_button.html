@@ -1,7 +1,18 @@
 <button
 	id="start-button"
-	class="rounded bg-orange-500 hover:bh-orange-400 px-2 py-1"
+	class="
+		rounded
+		bg-orange-500
+		hover:bd-orange-400
+		px-2
+		py-1
+		disabled:bg-gray-500
+	"
 	hx-post="/game/start?game_id={{ gameData.id }}"
-	hx-swap="none">
+	hx-swap="none"
+	{% if not gameData.can_start %}
+	disabled
+	{% endif %}
+	>
 	Start
 </button>
