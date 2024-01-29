@@ -10,11 +10,24 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import environ
 from pathlib import Path
+
+env = environ.Env(
+    # set casting, default value
+    DB_HOST=(str, "localhost"),
+    DB_PORT=(int, 5432),
+    DB_USER=(str, "bunker"),
+    DB_PASSWORD=(str, ""),
+    DB_NAME=(str, "bunker"),
+    DEBUG=(bool, False),
+    HOST=(str, "localhost")
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+environ.Env.read_env(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -23,10 +36,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t7(v3$cec2$rp*v8me)8ha!ejs^%!x+hrds^&a9qnvx193*1u8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = []
-
+if DEBUG:
+    ALLOWED_HOSTS.append("*")
+else:
+    ALLOWED_HOSTS.append(env("HOST"))
 
 # Application definition
 
@@ -56,7 +72,7 @@ ROOT_URLCONF = 'bunkersite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR,"bunkersite/templates"],
+        'DIRS': [BASE_DIR, "bunkersite/templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,8 +93,12 @@ WSGI_APPLICATION = 'bunkersite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT"),
     }
 }
 
@@ -122,6 +142,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "bunkersite/static"
 ]
+print(BASE_DIR / "bunkersite/static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
