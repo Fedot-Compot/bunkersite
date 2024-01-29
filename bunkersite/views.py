@@ -13,12 +13,12 @@ def index(request):
     except Session.DoesNotExist:
         return render(request, "index.html")
 
-    users = User.objects.filter(session_key=session)
+    users = User.objects.filter(session=session)
 
     games = []
 
     for user in users:
-        games.append(user.game_id)
+        games.append(user.game)
 
     context = {
         'games': games
@@ -36,7 +36,7 @@ def game(request):
     users = User.objects.filter(game_id=gameData.id)
     user = None
     try:
-        user = users.get(session_key=request.session.session_key)
+        user = users.get(session=request.session.session_key)
     except User.DoesNotExist:
         pass
 

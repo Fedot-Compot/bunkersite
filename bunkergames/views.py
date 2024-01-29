@@ -22,7 +22,7 @@ def ready(request):
     except Game.DoesNotExist:
         return Http404()
     try:
-        user = User.objects.get(game_id=game, session_key=session)
+        user = User.objects.get(game_id=game, session=session)
     except User.DoesNotExist:
         return Http404()
     user.ready = True
@@ -48,13 +48,13 @@ def not_ready(request):
     except Game.DoesNotExist:
         return Http404()
     try:
-        user = User.objects.get(game_id=game, session_key=session)
+        user = User.objects.get(game=game, session=session)
     except User.DoesNotExist:
         return Http404()
     user.ready = False
     user.save()
 
-    users = User.objects.filter(game_id=game)
+    users = User.objects.filter(game=game)
 
     game.can_start = all(game_user.ready for game_user in users)
 
@@ -76,10 +76,10 @@ def start_game(request):
     except Game.DoesNotExist:
         return Http404()
 
-    users = User.objects.filter(game_id=game)
+    users = User.objects.filter(game=game)
 
     try:
-        user = User.objects.get(game_id=game, session_key=session)
+        user = User.objects.get(game=game, session=session)
     except User.DoesNotExist:
         raise PermissionDenied("User not registered")
 
@@ -108,11 +108,11 @@ def game_state(request):
     user = None
 
     try:
-        user = User.objects.get(game_id=game, session_key=session)
+        user = User.objects.get(game=game, session=session)
     except User.DoesNotExist:
         pass
 
-    users = User.objects.filter(game_id=game)
+    users = User.objects.filter(game=game)
 
     game.can_start = all(game_user.ready for game_user in users)
 
@@ -132,11 +132,11 @@ def game_actions(request):
     user = None
 
     try:
-        user = User.objects.get(game_id=game, session_key=session)
+        user = User.objects.get(game=game, session=session)
     except User.DoesNotExist:
         pass
 
-    users = User.objects.filter(game_id=game)
+    users = User.objects.filter(game=game)
 
     game.can_start = all(game_user.ready for game_user in users)
 
@@ -156,11 +156,11 @@ def user_list(request):
     user = None
 
     try:
-        user = User.objects.get(game_id=game, session_key=session)
+        user = User.objects.get(game=game, session=session)
     except User.DoesNotExist:
         pass
 
-    users = User.objects.filter(game_id=game)
+    users = User.objects.filter(game=game)
 
     game.can_start = all(game_user.ready for game_user in users)
 

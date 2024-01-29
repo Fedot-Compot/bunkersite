@@ -40,7 +40,7 @@ def login(request):
         request.session.create()
     session = Session.objects.get(session_key=request.session.session_key)
     try:
-        User.objects.get(game_id=game, session_key=session)
+        User.objects.get(game_id=game, session=session)
         return HTTPResponseHXRedirect(redirect_to="/game?game_id=" + game_id)
     except User.DoesNotExist:
         pass
@@ -49,10 +49,10 @@ def login(request):
 
     try:
         User.objects.create(
-                game_id=game,
+                game=game,
                 username=username,
                 host=host,
-                session_key=session)
+                session=session)
     except IntegrityError:
         return HttpResponseBadRequest()
 
