@@ -9,6 +9,33 @@ from django.shortcuts import render
 from django.contrib.sessions.models import Session
 from bunkergames.models import Game
 from bunkerusers.models import User
+from django.db import connection
+
+
+def start_game_db(game_id):
+    query = '''
+    UPDATE bunkergames_game
+    SET started = true
+    WHERE id = %s
+    RETURNING *;
+    '''
+    with connection.cursor() as cursor:
+        cursor.execute(query, [game_id])
+        row = cursor.fetchone()
+    return row
+
+
+def update_user_ready(session_id, game_id, ready):
+    query = '''
+    UPDATE bunkerusers_user
+    SET ready = %s
+    WHERE session_id = %s AND game_id = %s
+    RETURNING *;
+    '''
+    with connection.cursor() as cursor:
+        cursor.execute(query, [ready, session_id, game_id])
+        row = cursor.fetchone()
+    return row
 
 # Create your views here.
 
@@ -16,22 +43,28 @@ from bunkerusers.models import User
 def ready(request):
     if request.method != 'POST':
         return HttpResponseBadRequest()
-    session = Session.objects.get(session_key=request.session.session_key)
-    try:
-        game = Game.objects.get(id=request.GET.get('game_id', ''))
-    except Game.DoesNotExist:
-        return Http404()
-    try:
-        user = User.objects.get(game_id=game, session=session)
-    except User.DoesNotExist:
-        return Http404()
-    user.ready = True
-    user.save()
+    game = Game.objects.raw(
+            "SELECT * FROM bunkergames_game WHERE id = %s",
+            [request.GET.get('game_id', '')])[0]
 
-    users = User.objects.filter(game_id=game)
+    if not game:
+        return Http404()
+
+    users = User.objects.raw(
+            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
+            [game.id])
+    user = None
+
+    for other in users:
+        if other.session_id == request.session.session_key:
+            user = other
+
+    if not user:
+        return HttpResponseBadRequest()
+
+    user = update_user_ready(user.session_id, user.game_id, True)
 
     game.can_start = all(game_user.ready for game_user in users)
-
     context = {'gameData': game, 'users': users, 'user': user}
 
     response = render(request, 'ready_button.html', context)
@@ -42,22 +75,28 @@ def ready(request):
 def not_ready(request):
     if request.method != 'POST':
         return HttpResponseBadRequest()
-    session = Session.objects.get(session_key=request.session.session_key)
-    try:
-        game = Game.objects.get(id=request.GET.get('game_id', ''))
-    except Game.DoesNotExist:
-        return Http404()
-    try:
-        user = User.objects.get(game=game, session=session)
-    except User.DoesNotExist:
-        return Http404()
-    user.ready = False
-    user.save()
+    game = Game.objects.raw(
+            "SELECT * FROM bunkergames_game WHERE id = %s",
+            [request.GET.get('game_id', '')])[0]
 
-    users = User.objects.filter(game=game)
+    if not game:
+        return Http404()
+
+    users = User.objects.raw(
+            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
+            [game.id])
+    user = None
+
+    for other in users:
+        if other.session_id == request.session.session_key:
+            user = other
+
+    if not user:
+        return HttpResponseBadRequest()
+
+    user = update_user_ready(user.session_id, user.game_id, False)
 
     game.can_start = all(game_user.ready for game_user in users)
-
     context = {'gameData': game, 'users': users, 'user': user}
 
     response = render(request, 'ready_button.html', context)
@@ -66,30 +105,33 @@ def not_ready(request):
 
 
 def start_game(request):
-
     if request.method != 'POST':
         return HttpResponseBadRequest()
-    session = Session.objects.get(session_key=request.session.session_key)
+    game = Game.objects.raw(
+            "SELECT * FROM bunkergames_game WHERE id = %s",
+            [request.GET.get('game_id', '')])[0]
 
-    try:
-        game = Game.objects.get(id=request.GET.get('game_id', ''))
-    except Game.DoesNotExist:
+    if not game:
         return Http404()
 
-    users = User.objects.filter(game=game)
+    users = User.objects.raw(
+            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
+            [game.id])
+    user = None
 
-    try:
-        user = User.objects.get(game=game, session=session)
-    except User.DoesNotExist:
-        raise PermissionDenied("User not registered")
+    for other in users:
+        if other.session_id == request.session.session_key:
+            user = other
+
+    if not user:
+        return HttpResponseBadRequest()
 
     if user.host:
         for game_user in users:
             if not game_user.ready:
                 raise PermissionDenied("Users are not ready")
 
-        game.started = True
-        game.save()
+        start_game_db(game.id)
     else:
         raise PermissionDenied("User is not host")
 
@@ -99,20 +141,21 @@ def start_game(request):
 
 
 def game_state(request):
-    session = Session.objects.get(session_key=request.session.session_key)
-    try:
-        game = Game.objects.get(id=request.GET.get('game_id', ''))
-    except Game.DoesNotExist:
+    game = Game.objects.raw(
+            "SELECT * FROM bunkergames_game WHERE id = %s",
+            [request.GET.get('game_id', '')])[0]
+
+    if not game:
         return Http404()
 
+    users = User.objects.raw(
+            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
+            [game.id])
     user = None
 
-    try:
-        user = User.objects.get(game=game, session=session)
-    except User.DoesNotExist:
-        pass
-
-    users = User.objects.filter(game=game)
+    for other in users:
+        if other.session_id == request.session.session_key:
+            user = other
 
     game.can_start = all(game_user.ready for game_user in users)
 
@@ -123,20 +166,21 @@ def game_state(request):
 
 
 def game_actions(request):
-    session = Session.objects.get(session_key=request.session.session_key)
-    try:
-        game = Game.objects.get(id=request.GET.get('game_id', ''))
-    except Game.DoesNotExist:
+    game = Game.objects.raw(
+            "SELECT * FROM bunkergames_game WHERE id = %s",
+            [request.GET.get('game_id', '')])[0]
+
+    if not game:
         return Http404()
 
+    users = User.objects.raw(
+            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
+            [game.id])
     user = None
 
-    try:
-        user = User.objects.get(game=game, session=session)
-    except User.DoesNotExist:
-        pass
-
-    users = User.objects.filter(game=game)
+    for other in users:
+        if other.session_id == request.session.session_key:
+            user = other
 
     game.can_start = all(game_user.ready for game_user in users)
 
@@ -147,20 +191,21 @@ def game_actions(request):
 
 
 def user_list(request):
-    session = Session.objects.get(session_key=request.session.session_key)
-    try:
-        game = Game.objects.get(id=request.GET.get('game_id', ''))
-    except Game.DoesNotExist:
+    game = Game.objects.raw(
+            "SELECT * FROM bunkergames_game WHERE id = %s",
+            [request.GET.get('game_id', '')])[0]
+
+    if not game:
         return Http404()
 
+    users = User.objects.raw(
+            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
+            [game.id])
     user = None
 
-    try:
-        user = User.objects.get(game=game, session=session)
-    except User.DoesNotExist:
-        pass
-
-    users = User.objects.filter(game=game)
+    for other in users:
+        if other.session_id == request.session.session_key:
+            user = other
 
     game.can_start = all(game_user.ready for game_user in users)
 
