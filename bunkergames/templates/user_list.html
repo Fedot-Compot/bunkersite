@@ -2,7 +2,7 @@
 	hx-get="/game/user_list?game_id={{ gameData.id }}"
 	hx-trigger="UserGameStateChange from:body"
 	hx-swap="outerHTML"
-	class="flex flex-col my-5"
+	class="inline-grid glid-cols-1 my-5"
 	>
 	{% for other in users %}
 	<div class="
@@ -18,6 +18,20 @@
 		"><span>{{ other.username }}</span>
 		{% if other.host %}
 		<img src="static/img/host_mark.png" class="w-4 h-4 m-1"/>
+		{% elif user.host and not gameData.started%}
+			<button
+				hx-post="/game/kick?game_id={{ gameData.id }}&username={{other.username}}"
+				class="
+				bg-red-600
+				hover:bg-red-500
+				rounded
+				outline
+				outline-1
+				m-1
+				px-1
+				">
+				X
+			</button>
 		{% endif%}
 	</div>
 	{% endfor %}

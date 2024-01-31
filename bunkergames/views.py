@@ -6,7 +6,6 @@ from django.http import (
 )
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
-from django.contrib.sessions.models import Session
 from bunkergames.models import Game
 from bunkerusers.models import User
 from django.db import connection
@@ -35,6 +34,24 @@ def update_user_ready(session_id, game_id, ready):
     with connection.cursor() as cursor:
         cursor.execute(query, [ready, session_id, game_id])
         row = cursor.fetchone()
+    return row
+
+
+def kick_user_from_lobby(game_id, username):
+    query = '''
+    DELETE FROM bunkerusers_user
+    USING bunkergames_game
+    WHERE
+        bunkergames_game.id = bunkerusers_user.game_id AND
+        game_id = %s AND
+        username = %s AND
+        NOT bunkergames_game.started
+    RETURNING bunkerusers_user.*;
+    '''
+    with connection.cursor() as cursor:
+        cursor.execute(query, [game_id, username])
+        row = cursor.fetchone()
+
     return row
 
 # Create your views here.
@@ -134,6 +151,35 @@ def start_game(request):
         start_game_db(game.id)
     else:
         raise PermissionDenied("User is not host")
+
+    response = HttpResponse()
+    response["HX-Trigger"] = "GameStateChange"
+    return response
+
+
+def kick_user(request):
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
+
+    user = User.objects.raw(
+            '''
+            SELECT
+                *
+            FROM bunkerusers_user
+            WHERE game_id = %s AND session_id = %s AND host
+            ''',
+            [request.GET.get('game_id', ''), request.session.session_key])[0]
+
+    if not user:
+        raise PermissionDenied("User not authorized")
+
+    kicked_user = kick_user_from_lobby(
+            request.GET.get('game_id', ''),
+            request.GET.get('username', '')
+            )
+
+    if not kicked_user:
+        return HttpResponseBadRequest()
 
     response = HttpResponse()
     response["HX-Trigger"] = "GameStateChange"
