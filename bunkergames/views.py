@@ -11,6 +11,32 @@ from bunkerusers.models import User
 from django.db import connection
 
 
+def get_game_context(request):
+    game = Game.objects.raw(
+            "SELECT * FROM bunkergames_game WHERE id = %s",
+            [request.GET.get('game_id', '')])[0]
+
+    if not game:
+        raise Http404()
+
+    users = User.objects.raw(
+            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
+            [game.id])
+    user = None
+
+    for other in users:
+        if other.session_id == request.session.session_key:
+            user = other
+
+    game.can_start = all(game_user.ready for game_user in users)
+
+    return {
+        'gameData': game,
+        'users': users,
+        'user': user
+    }
+
+
 def start_game_db(game_id):
     query = '''
     UPDATE bunkergames_game
@@ -60,29 +86,19 @@ def kick_user_from_lobby(game_id, username):
 def ready(request):
     if request.method != 'POST':
         return HttpResponseBadRequest()
-    game = Game.objects.raw(
-            "SELECT * FROM bunkergames_game WHERE id = %s",
-            [request.GET.get('game_id', '')])[0]
 
-    if not game:
+    try:
+        context = get_game_context(request)
+    except Http404:
         return Http404()
 
-    users = User.objects.raw(
-            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
-            [game.id])
-    user = None
-
-    for other in users:
-        if other.session_id == request.session.session_key:
-            user = other
-
-    if not user:
+    if not context['user']:
         return HttpResponseBadRequest()
 
-    user = update_user_ready(user.session_id, user.game_id, True)
-
-    game.can_start = all(game_user.ready for game_user in users)
-    context = {'gameData': game, 'users': users, 'user': user}
+    context['user'] = update_user_ready(
+            context['user'].session_id,
+            context['gameData'].id,
+            True)
 
     response = render(request, 'ready_button.html', context)
     response["HX-Trigger"] = "UserGameStateChange, ActionsGameStateChange"
@@ -92,29 +108,19 @@ def ready(request):
 def not_ready(request):
     if request.method != 'POST':
         return HttpResponseBadRequest()
-    game = Game.objects.raw(
-            "SELECT * FROM bunkergames_game WHERE id = %s",
-            [request.GET.get('game_id', '')])[0]
 
-    if not game:
+    try:
+        context = get_game_context(request)
+    except Http404:
         return Http404()
 
-    users = User.objects.raw(
-            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
-            [game.id])
-    user = None
-
-    for other in users:
-        if other.session_id == request.session.session_key:
-            user = other
-
-    if not user:
+    if not context['user']:
         return HttpResponseBadRequest()
 
-    user = update_user_ready(user.session_id, user.game_id, False)
-
-    game.can_start = all(game_user.ready for game_user in users)
-    context = {'gameData': game, 'users': users, 'user': user}
+    context['user'] = update_user_ready(
+            context['user'].session_id,
+            context['gameData'].id,
+            False)
 
     response = render(request, 'ready_button.html', context)
     response["HX-Trigger"] = "UserGameStateChange, ActionsGameStateChange"
@@ -124,31 +130,21 @@ def not_ready(request):
 def start_game(request):
     if request.method != 'POST':
         return HttpResponseBadRequest()
-    game = Game.objects.raw(
-            "SELECT * FROM bunkergames_game WHERE id = %s",
-            [request.GET.get('game_id', '')])[0]
 
-    if not game:
+    try:
+        context = get_game_context(request)
+    except Http404:
         return Http404()
 
-    users = User.objects.raw(
-            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
-            [game.id])
-    user = None
-
-    for other in users:
-        if other.session_id == request.session.session_key:
-            user = other
-
-    if not user:
+    if not context['user']:
         return HttpResponseBadRequest()
 
-    if user.host:
-        for game_user in users:
+    if context['user'].host:
+        for game_user in context['users']:
             if not game_user.ready:
                 raise PermissionDenied("Users are not ready")
 
-        start_game_db(game.id)
+        start_game_db(context['gameData'].id)
     else:
         raise PermissionDenied("User is not host")
 
@@ -175,8 +171,7 @@ def kick_user(request):
 
     kicked_user = kick_user_from_lobby(
             request.GET.get('game_id', ''),
-            request.GET.get('username', '')
-            )
+            request.GET.get('username', ''))
 
     if not kicked_user:
         return HttpResponseBadRequest()
@@ -187,75 +182,30 @@ def kick_user(request):
 
 
 def game_state(request):
-    game = Game.objects.raw(
-            "SELECT * FROM bunkergames_game WHERE id = %s",
-            [request.GET.get('game_id', '')])[0]
-
-    if not game:
+    try:
+        context = get_game_context(request)
+    except Http404:
         return Http404()
-
-    users = User.objects.raw(
-            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
-            [game.id])
-    user = None
-
-    for other in users:
-        if other.session_id == request.session.session_key:
-            user = other
-
-    game.can_start = all(game_user.ready for game_user in users)
-
-    context = {'gameData': game, 'users': users, 'user': user}
 
     response = render(request, 'game_view.html', context)
     return response
 
 
 def game_actions(request):
-    game = Game.objects.raw(
-            "SELECT * FROM bunkergames_game WHERE id = %s",
-            [request.GET.get('game_id', '')])[0]
-
-    if not game:
+    try:
+        context = get_game_context(request)
+    except Http404:
         return Http404()
-
-    users = User.objects.raw(
-            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
-            [game.id])
-    user = None
-
-    for other in users:
-        if other.session_id == request.session.session_key:
-            user = other
-
-    game.can_start = all(game_user.ready for game_user in users)
-
-    context = {'gameData': game, 'users': users, 'user': user}
 
     response = render(request, 'game_actions.html', context)
     return response
 
 
 def user_list(request):
-    game = Game.objects.raw(
-            "SELECT * FROM bunkergames_game WHERE id = %s",
-            [request.GET.get('game_id', '')])[0]
-
-    if not game:
+    try:
+        context = get_game_context(request)
+    except Http404:
         return Http404()
-
-    users = User.objects.raw(
-            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
-            [game.id])
-    user = None
-
-    for other in users:
-        if other.session_id == request.session.session_key:
-            user = other
-
-    game.can_start = all(game_user.ready for game_user in users)
-
-    context = {'gameData': game, 'users': users, 'user': user}
 
     response = render(request, 'user_list.html', context)
     return response
