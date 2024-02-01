@@ -9,6 +9,7 @@ class User(models.Model):
     username = models.CharField(max_length=32)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     host = models.BooleanField(default=False)
+    showman = models.BooleanField(default=False)
     ready = models.BooleanField(default=False)
     data = models.JSONField(blank=True, null=True)
 

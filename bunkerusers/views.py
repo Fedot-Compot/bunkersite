@@ -52,6 +52,7 @@ def login(request):
                 game=game,
                 username=username,
                 host=host,
+                showman=host,
                 session=session)
     except IntegrityError:
         return HttpResponseBadRequest()

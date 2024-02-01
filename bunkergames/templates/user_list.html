@@ -16,6 +16,9 @@
 		{% else %}outline-red-600 {% endif %}
 		{% if other.id == user.id %} font-bold {% endif %}
 		"><span>{{ other.username }}</span>
+		{% if other.showman %}
+		<img src="static/img/showman_mark.png" class="w-4 h-4 m-1">
+		{% endif %}
 		{% if other.host %}
 		<img src="static/img/host_mark.png" class="w-4 h-4 m-1"/>
 		{% elif user.host and not gameData.started%}
