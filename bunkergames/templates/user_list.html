@@ -20,6 +20,7 @@
 		<img src="static/img/host_mark.png" class="w-4 h-4 m-1"/>
 		{% elif user.host and not gameData.started%}
 			<button
+				title="Kick from lobby"
 				hx-post="/game/kick?game_id={{ gameData.id }}&username={{other.username}}"
 				class="
 				bg-red-600
