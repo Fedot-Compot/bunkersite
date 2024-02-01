@@ -1,4 +1,29 @@
 <form hx-post="/user/login?game_id={{ gameData.id }}">
-  <input name="username" placeholder="Insert username" />
-  <button type="submit">Enter lobby</button>
+	<input
+		name="username"
+		class="rounded
+			outline
+			{% if taken %} outline-red-600 {% endif %}
+			outline-1
+			p-0.5"
+		placeholder="Insert username"
+		{% if taken%}
+			value="{{ username }}"
+		{% endif %}
+		/>
+	<button
+		type="submit"
+		class="rounded
+			outline
+			outline-1
+			px-2
+			py-1
+			m-1
+			bg-sky-600
+			hover:bg-sky-500" >
+		Enter lobby
+	</button>
+	{% if taken %}
+	<p class="text-red-600">Username is not available</p>
+	{% endif %}
 </form>

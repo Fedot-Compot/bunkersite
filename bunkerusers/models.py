@@ -8,9 +8,9 @@ class User(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     username = models.CharField(max_length=32)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
-    host = models.BooleanField(default=False)
-    showman = models.BooleanField(default=False)
-    ready = models.BooleanField(default=False)
+    host = models.BooleanField(db_default=False, default=False)
+    showman = models.BooleanField(db_default=False, default=False)
+    ready = models.BooleanField(db_default=False, default=False)
     data = models.JSONField(blank=True, null=True)
 
     class Meta:
