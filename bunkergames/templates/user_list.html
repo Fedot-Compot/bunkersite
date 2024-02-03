@@ -16,12 +16,31 @@
 		{% else %}outline-red-600 {% endif %}
 		{% if other.id == user.id %} font-bold {% endif %}
 		"><span>{{ other.username }}</span>
-		{% if other.showman %}
-		<img src="static/img/showman_mark.png" class="w-4 h-4 m-1">
-		{% endif %}
 		{% if other.host %}
-		<img src="static/img/host_mark.png" class="w-4 h-4 m-1"/>
-		{% elif user.host and not gameData.started%}
+		<img src="static/img/host_mark.png" class="w-4 h-4 m-1.5"/>
+		{% endif %}
+		{% if other.showman %}
+		<img src="static/img/showman_mark.png" class="w-4 h-4 m-1.5">
+		{% endif %}
+		{% if user.host and not gameData.started%}
+			{% if not other.showman %}
+			<button
+				title="Kick from lobby"
+				hx-post="/game/showman?game_id={{ gameData.id }}&username={{other.username}}"
+				class="
+				bg-blue-600
+				hover:bg-blue-500
+				rounded
+				outline
+				outline-1
+				m-1
+				w-5
+				h-5
+				">
+		<img src="static/img/showman_mark.png" class="w-4 h-4 m-0.5">
+			</button>
+			{% endif %}
+			{% if not other.host%}
 			<button
 				title="Kick from lobby"
 				hx-post="/game/kick?game_id={{ gameData.id }}&username={{other.username}}"
@@ -32,10 +51,13 @@
 				outline
 				outline-1
 				m-1
-				px-1
+				w-5
+				h-5
+				text-sm
 				">
 				X
 			</button>
+			{% endif %}
 		{% endif%}
 	</div>
 	{% endfor %}

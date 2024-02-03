@@ -10,5 +10,6 @@ urlpatterns = [
     path('user_list', views.user_list),
     path('state', views.game_state),
     path('actions', views.game_actions),
-    path('kick', views.kick_user)
+    path('kick', views.kick_user),
+    path('showman', views.make_user_showman)
 ]

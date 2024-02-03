@@ -62,6 +62,21 @@ def update_user_ready(session_id, game_id, ready):
     return row
 
 
+def change_showman_db(game_id, username):
+    query = '''
+    UPDATE bunkerusers_user
+    SET showman = CASE WHEN username = %s THEN true ELSE false END
+    WHERE game_id = %s
+    '''
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute(query, [username, game_id])
+        except Exception:
+            return False
+
+    return True
+
+
 def kick_user_from_lobby(game_id, username):
     query = '''
     DELETE FROM bunkerusers_user
@@ -152,6 +167,35 @@ def start_game(request):
     return response
 
 
+def make_user_showman(request):
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
+
+    user = User.objects.raw(
+            '''
+            SELECT
+                *
+            FROM bunkerusers_user
+            WHERE game_id = %s AND session_id = %s AND host
+            ''',
+            [request.GET.get('game_id', ''), request.session.session_key])[0]
+
+    if not user:
+        raise PermissionDenied("User not authorized")
+
+    success = change_showman_db(
+            request.GET.get('game_id', ''),
+            request.GET.get('username', ''))
+
+    print(success)
+    if not success:
+        return HttpResponseBadRequest()
+
+    response = HttpResponse()
+    response["HX-Trigger"] = "UserGameStateChange"
+    return response
+
+
 def kick_user(request):
     if request.method != 'POST':
         return HttpResponseBadRequest()
@@ -176,7 +220,7 @@ def kick_user(request):
         return HttpResponseBadRequest()
 
     response = HttpResponse()
-    response["HX-Trigger"] = "GameStateChange"
+    response["HX-Trigger"] = "GameUserStateChange"
     return response
 
 
