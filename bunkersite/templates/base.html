@@ -2,8 +2,11 @@
 <html>
   <head>
     <script src="{% static "js/htmx.min.js" %}"></script>
-    <script src="{% static "js/tailwind.js" %}"></script>
-    <link rel="stylesheet" type='text/css' href="{% static "css/style.css" %}">
+    <!---
+		<script src="{% static "js/tailwind.js" %}"></script>
+	--->
+	
+	<link rel="stylesheet" type='text/css' href="{% static "css/output.css" %}">
   </head>
   <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <div id="navbar">

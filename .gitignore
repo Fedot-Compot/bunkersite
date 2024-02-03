@@ -18,7 +18,8 @@ downloads/
 eggs/ 
 .eggs/ 
 lib/ 
-lib64/ 
+bin/
+lib64
 parts/ 
 sdist/ 
 var/ 
@@ -29,6 +30,7 @@ wheels/
 *.egg 
 *.manifest 
 *.spec 
+pyvenv.cfg
 
 # Installer logs 
 pip-log.txt 
