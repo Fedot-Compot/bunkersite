@@ -2,27 +2,39 @@
 	hx-get="/game/user_list?game_id={{ gameData.id }}"
 	hx-trigger="UserGameStateChange from:body"
 	hx-swap="outerHTML"
-	class="inline-grid glid-cols-1 my-5"
 	>
-	{% for other in users %}
-	<div class="
-		flex
-		flex-row
-		m-1
-		outline
-		outline-1
-		rounded
-		{% if other.ready%} outline-green-600
-		{% else %}outline-red-600 {% endif %}
-		{% if other.id == user.id %} font-bold {% endif %}
-		"><span>{{ other.username }}</span>
-		{% if other.host %}
-		<img src="static/img/host_mark.png" class="w-4 h-4 m-1.5"/>
-		{% endif %}
+	<div
+		class="inline-grid grid-cols-2 my-5"
+		>
+		{% for other in users %}
+		<div class="flex flex-row items-center">
+			<div class="
+				flex
+				flex-row
+				grow
+				items-center
+				m-1
+				outline
+				outline-1
+				rounded
+				{% if other.ready%} outline-green-600
+				{% else %}outline-red-600 {% endif %}
+				{% if other.id == user.id %} font-bold {% endif %}
+				">
+				<span class="mx-1 mr-4 grow">
+					{{ other.username }}
+				</span>
 		{% if other.showman %}
-		<img src="static/img/showman_mark.png" class="w-4 h-4 m-1.5">
+		<img src="static/img/showman_mark.png" class="w-4 h-4 m-0.5">
 		{% endif %}
-		{% if user.host and not gameData.started%}
+		{% if other.host %}
+		<img src="static/img/host_mark.png" class="w-4 h-4 m-0.5"/>
+		{% endif %}
+			</div>
+		</div>
+		<div
+			class="flex flex-row items-center">
+			{% if user.host and not gameData.started%}
 			{% if not other.showman %}
 			<button
 				title="Kick from lobby"
@@ -37,7 +49,7 @@
 				w-5
 				h-5
 				">
-		<img src="static/img/showman_mark.png" class="w-4 h-4 m-0.5">
+				<img src="static/img/showman_mark.png" class="w-4 h-4 m-0.5">
 			</button>
 			{% endif %}
 			{% if not other.host%}
@@ -58,7 +70,8 @@
 				X
 			</button>
 			{% endif %}
-		{% endif%}
+			{% endif%}
+		</div>
+		{% endfor %}
 	</div>
-	{% endfor %}
 </div>

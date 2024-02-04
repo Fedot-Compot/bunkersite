@@ -1,5 +1,8 @@
 {
-  "devDependencies": {
-    "tailwindcss": "^3.4.1"
-  }
+	"scripts":{
+		"tailwind": "npx tailwindcss -i ./bunkersite/static/css/style.css -o ./bunkersite/static/css/output.css --watch -m"
+	},
+	"devDependencies": {
+		"tailwindcss": "^3.4.1"
+	}
 }
