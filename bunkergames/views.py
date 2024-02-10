@@ -220,7 +220,7 @@ def kick_user(request):
         return HttpResponseBadRequest()
 
     response = HttpResponse()
-    response["HX-Trigger"] = "GameUserStateChange"
+    response["HX-Trigger"] = "UserGameStateChange"
     return response
 
 
