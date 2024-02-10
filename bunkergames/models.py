@@ -1,15 +1,16 @@
 from django.db import models
 from django.core.validators import MinLengthValidator
-import random, string
 import uuid
-import base64
+
 
 def generate_id():
     return str(uuid.uuid4()).replace('-', '')
-    
+
 
 class Game(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, default = generate_id, validators=[MinLengthValidator(32)])
+    id = models.CharField(
+            max_length=32,
+            primary_key=True,
+            default=generate_id,
+            validators=[MinLengthValidator(32)])
     started = models.BooleanField(default=False)
-    
-    
