@@ -1,7 +1,6 @@
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from bunkergames.models import Game
 from bunkerusers.models import User
+from bunkergames.helpers import get_game_context
 
 
 # Create your views here.
@@ -25,23 +24,5 @@ def index(request):
 
 
 def game(request):
-    gameData = Game.objects.raw(
-            "SELECT * FROM bunkergames_game WHERE id = %s",
-            [request.GET.get("game_id", "")])[0]
-
-    if not gameData:
-        return HttpResponseRedirect("/game/404.html")
-
-    users = User.objects.raw(
-            "SELECT * FROM bunkerusers_user WHERE game_id = %s",
-            [gameData.id])
-    user = None
-
-    for other in users:
-        if other.session_id == request.session.session_key:
-            user = other
-
-    gameData.can_start = all(game_user.ready for game_user in users)
-
-    context = {'gameData': gameData, 'users': users, 'user': user}
+    context = get_game_context(request)
     return render(request, "game.html", context)
