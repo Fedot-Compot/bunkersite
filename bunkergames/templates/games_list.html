@@ -1,5 +1,5 @@
 <div class="inline-grid grid-cols-1">
 {% for game in games %}
-	<button hx-get="/game?game_id={{ game.id }}" class="bg-sky-600 hover:bg-sky-500 rounded m-1 p-1" hx-target="#app" hx-replace-url="true">{{ game.id }}</button>
+	<button hx-get="/game?game_id={{ game.id }}" class="bg-sky-600 hover:bg-sky-500 rounded m-1 p-1" hx-target="#app" hx-push-url="true">{{ game.id }}</button>
 {% endfor %}
 </div>
