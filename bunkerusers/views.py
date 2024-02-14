@@ -2,7 +2,6 @@ from django.http.response import (
         Http404,
         HttpResponseRedirect,
         HttpResponseBadRequest)
-from django.views.decorators.csrf import csrf_exempt
 from .models import Game, User
 from django.shortcuts import render
 from django.db import connection
@@ -47,6 +46,8 @@ def login(request):
     if request.method != "POST":
         return Http404()
     username = request.POST['username']
+    if len(username) < 4:
+        raise HttpResponseBadRequest("username is too short")
     game_id = request.GET.get("game_id", '')
     game = None
     host = False

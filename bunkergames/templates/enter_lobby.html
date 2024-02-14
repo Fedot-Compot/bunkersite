@@ -7,6 +7,8 @@
 			outline-1
 			p-0.5"
 		placeholder="Insert username"
+		required
+		minlength="4"
 		{% if taken%}
 			value="{{ username }}"
 		{% endif %}
